@@ -37,7 +37,12 @@ constructor(private val firestore: FirebaseFirestore, private val auth: AccountS
 
   @OptIn(ExperimentalCoroutinesApi::class)
   override val tasks: Flow<List<Task>>
-    get() = emptyFlow()
+    get() =
+      auth.currentUser.flatMapLatest { user ->
+        firestore.collection(TASK_COLLECTION)
+          .whereEqualTo(USER_ID_FIELD, user.id)
+          .dataObjects()   // extensión del codelab que mapea a List<Task>
+      }
 
   override suspend fun getTask(taskId: String): Task? =
     firestore.collection(TASK_COLLECTION).document(taskId).get().await().toObject()

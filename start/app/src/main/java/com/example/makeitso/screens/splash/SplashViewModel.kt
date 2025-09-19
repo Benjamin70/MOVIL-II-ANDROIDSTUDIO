@@ -36,7 +36,7 @@ class SplashViewModel @Inject constructor(
   val showError = mutableStateOf(false)
 
   init {
-    launchCatching { configurationService.fetchConfiguration() }
+    launchCatching { configurationService.fetch() }
   }
 
   fun onAppStart(openAndPopUp: (String, String) -> Unit) {

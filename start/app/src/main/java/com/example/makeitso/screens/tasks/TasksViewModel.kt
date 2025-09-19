@@ -31,16 +31,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
-  logService: LogService,
   private val storageService: StorageService,
-  private val configurationService: ConfigurationService
+  private val configurationService: ConfigurationService,     // <- inyecta config
+  logService: LogService
 ) : MakeItSoViewModel(logService) {
-  val options = mutableStateOf<List<String>>(listOf())
 
-  val tasks = emptyFlow<List<Task>>()
+  val options = mutableStateOf<List<String>>(listOf())
+  val tasks = storageService.tasks
+
 
   fun loadTaskOptions() {
-    //TODO
+    launchCatching {
+      configurationService.fetch()                  // descarga y activa
+      options.value = configurationService.getTaskOptions()
+    }
   }
 
   fun onTaskCheckChange(task: Task) {

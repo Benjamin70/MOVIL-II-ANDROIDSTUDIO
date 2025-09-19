@@ -17,6 +17,11 @@ limitations under the License.
 package com.example.makeitso.model.service
 
 interface ConfigurationService {
-  suspend fun fetchConfiguration(): Boolean
-  val isShowTaskEditButtonConfig: Boolean
+  suspend fun fetch()
+  fun getTaskOptions(): List<String>
+
+  companion object {
+    const val TASK_OPTIONS = "task_options"
+    const val TASK_OPTIONS_DEFAULT = """["Edit task", "Toggle flag", "Delete task"]"""
+  }
 }

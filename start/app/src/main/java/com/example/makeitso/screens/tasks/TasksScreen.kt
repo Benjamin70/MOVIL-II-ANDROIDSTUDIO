@@ -17,17 +17,29 @@ limitations under the License.
 package com.example.makeitso.screens.tasks
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.makeitso.R.drawable as AppIcon
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.common.composable.ActionToolbar
@@ -42,7 +54,11 @@ fun TasksScreen(
   openScreen: (String) -> Unit,
   viewModel: TasksViewModel = hiltViewModel()
 ) {
+  // Colecta el Flow<List<Task>> del ViewModel
+  val tasks: List<Task> by viewModel.tasks.collectAsStateWithLifecycle(emptyList())
+
   TasksScreenContent(
+    tasks = tasks,
     onAddClick = viewModel::onAddClick,
     onSettingsClick = viewModel::onSettingsClick,
     onTaskCheckChange = viewModel::onTaskCheckChange,
@@ -58,6 +74,7 @@ fun TasksScreen(
 @ExperimentalMaterialApi
 fun TasksScreenContent(
   modifier: Modifier = Modifier,
+  tasks: List<Task>,
   onAddClick: ((String) -> Unit) -> Unit,
   onSettingsClick: ((String) -> Unit) -> Unit,
   onTaskCheckChange: (Task) -> Unit,
@@ -70,13 +87,19 @@ fun TasksScreenContent(
         onClick = { onAddClick(openScreen) },
         backgroundColor = MaterialTheme.colors.primary,
         contentColor = MaterialTheme.colors.onPrimary,
-        modifier = modifier.padding(16.dp)
+        modifier = Modifier
+          .padding(16.dp)
+          .navigationBarsPadding()
       ) {
-        Icon(Icons.Filled.Add, "Add")
+        Icon(imageVector = Icons.Filled.Add, contentDescription = null)
       }
     }
   ) {
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+    Column(
+      modifier = modifier
+        .fillMaxWidth()
+        .fillMaxHeight()
+    ) {
       ActionToolbar(
         title = AppText.tasks,
         modifier = Modifier.toolbarActions(),
@@ -87,10 +110,10 @@ fun TasksScreenContent(
       Spacer(modifier = Modifier.smallSpacer())
 
       LazyColumn {
-        items(emptyList<Task>(), key = { it.id }) { taskItem ->
+        items(tasks, key = { it.id }) { taskItem ->
           TaskItem(
             task = taskItem,
-            options = listOf(),
+            options = listOf(), // si luego usas opciones del VM, pásalas aquí
             onCheckChange = { onTaskCheckChange(taskItem) },
             onActionClick = { action -> onTaskActionClick(openScreen, taskItem, action) }
           )
@@ -106,6 +129,7 @@ fun TasksScreenContent(
 fun TasksScreenPreview() {
   MakeItSoTheme {
     TasksScreenContent(
+      tasks = emptyList(),
       onAddClick = { },
       onSettingsClick = { },
       onTaskCheckChange = { },
